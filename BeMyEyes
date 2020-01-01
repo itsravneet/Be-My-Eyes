@@ -1,0 +1,374 @@
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import speech_recognition as sr
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from pygame import mixer
+mixer.init()
+import turtle
+from turtle import *
+import time
+from difflib import get_close_matches
+import win32com.client as wincl
+
+
+class new:
+    def speech_command(self):
+
+        self.i = 0
+        while self.i == 0:
+            # obtain audio from the microphone
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                # print("Please wait. Calibrating microphone...")
+                # listen for 1 second and create the ambient noise energy level
+                r.adjust_for_ambient_noise(source, duration=1)
+                print("Speak Command:")
+                self.speak.Speak("Speak Command")
+                audio = r.listen(source, phrase_time_limit=4)
+
+            # recognize speech using Sphinx/Google
+            try:
+                self.response = r.recognize_google(audio)
+                print("You Said:" + self.response)
+                self.speak.Speak("You said " + str(self.response))
+
+
+            except sr.UnknownValueError:
+                print("Cannot understand")
+                self.speak.Speak("Cannot understand")
+                self.command()
+            except sr.RequestError as e:
+                print("Sphinx error; {0}".format(e))
+
+            self.i = self.i + 1
+
+    def speech_name(self):
+        self.i = 0
+        while self.i == 0:
+            # obtain audio from the microphone
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                # print("Please wait. Calibrating microphone...")
+                # listen for 1 second and create the ambient noise energy level
+                r.adjust_for_ambient_noise(source, duration=1)
+                print("Speak Name:")
+                self.speak.Speak("Speak Name")
+                audio = r.listen(source, phrase_time_limit=4)
+
+            # recognize speech using Sphinx/Google
+            try:
+                self.response = r.recognize_google(audio)
+
+            except sr.UnknownValueError:
+                print("Cannot understand")
+                self.speak.Speak("Cannot understand")
+                self.speech_name()
+            except sr.RequestError as e:
+                print("Sphinx error; {0}".format(e))
+
+            self.i = self.i + 1
+
+    def speech_group(self):
+        self.i = 0
+        while self.i == 0:
+            # obtain audio from the microphone
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                # print("Please wait. Calibrating microphone...")
+                # listen for 1 second and create the ambient noise energy level
+                r.adjust_for_ambient_noise(source, duration=1)
+                print("Speak Group Name:")
+                self.speak.Speak("Speak Group Name")
+                audio = r.listen(source, phrase_time_limit=4)
+
+            # recognize speech using Sphinx/Google
+            try:
+                self.response = r.recognize_google(audio)
+                print("You said '" + self.response + "'")
+                self.speak.Speak("You said " + str(self.response))
+
+            except sr.UnknownValueError:
+                print("Cannot understand")
+                self.speak.Speak("Can not understand")
+                self.speech_group()
+            except sr.RequestError as e:
+                print("Sphinx error; {0}".format(e))
+
+            self.i = self.i + 1
+
+    def speech_message(self):
+        self.i = 0
+        while self.i == 0:
+            # obtain audio from the microphone
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                # print("Please wait. Calibrating microphone...")
+                # listen for 1 second and create the ambient noise energy level
+                r.adjust_for_ambient_noise(source, duration=1)
+                print("You:")
+                self.speak.Speak("Speak message")
+                audio = r.listen(source, phrase_time_limit=4)
+
+            # recognize speech using Sphinx/Google
+            try:
+                self.response = r.recognize_google(audio)
+                print("You said '" + self.response + "'")
+                self.speak.Speak("You said " + str(self.response))
+
+
+            except sr.UnknownValueError:
+                print("Can not understand")
+                self.speech_message()
+            except sr.RequestError as e:
+                print("Sphinx error; {0}".format(e))
+
+            self.i = self.i + 1
+
+    def openingWhatsapp(self):
+        self.speak = wincl.Dispatch("SAPI.SpVoice")
+        self.speak.Speak("Open whatsapp web to scan")
+        self.driver = webdriver.Chrome('chromedriver')
+        self.driver.get("https://web.whatsapp.com/")
+        self.wait = WebDriverWait(self.driver, 300)
+        self.command()
+
+    def sendingMessages(self):
+        self.nameList = []
+        x = '//span[@dir="auto"][@class="_1wjpf"]'
+        names = self.driver.find_elements_by_xpath(x)
+        for i in names:
+            self.nameList.append(i.text)
+
+        self.speech_name()
+        # self.name=self.response
+        self.temp = self.response
+
+        if self.temp in self.nameList:
+            self.name = self.temp
+        elif len(get_close_matches(self.temp, self.nameList)) > 0:
+            print("Esmitated name:", get_close_matches(self.temp, self.nameList)[0])
+            self.speak.Speak("You said" + get_close_matches(self.temp, self.nameList)[0])
+            self.name = get_close_matches(self.temp, self.nameList)[0]
+        else:
+            print("Name does not Exist :(")
+            self.speak.Speak("Name does not Exist")
+            self.sendingMessages()
+
+        # self.name=input("Enter name:")
+        if self.name == 'back' or self.name == 'Back':
+            self.command()
+        else:
+            print("\n\n         ", self.name)
+            self.speak.Speak("Send messages to" + self.name)
+            # checking if the person has sent any messages
+            a = '//div[@class="_3j7s9"]'
+            allMsg = self.driver.find_elements_by_xpath(a)
+            l = []
+            for i in allMsg:
+                l.append(list(map(str, i.text.split('\n'))))
+            whoSent = []
+            nomsg = []
+            for i in l:
+                try:
+                    if int(i[len(i) - 1]):
+                        print("{}:({})".format(i[0], i[len(i) - 1]))
+                        whoSent.append(i[0])
+                        nomsg.append([i[0], i[len(i) - 1]])
+                except Exception:
+                    pass
+
+            if self.name in whoSent:
+                # clicking the person name
+                x_arg = '//span[contains(@title,"' + self.name + '")]'
+                group_title = self.wait.until(EC.presence_of_element_located((By.XPATH, x_arg)))
+                group_title.click()
+                time.sleep(10)
+
+                # getting the messages of that person
+                x_arg = '//span[@dir="ltr"][@class="selectable-text invisible-space copyable-text"]'
+                text = self.driver.find_elements_by_xpath(x_arg)
+                msg = []
+                for i in text:
+                    msg.append(i.text)
+                no = 0
+                for i in nomsg:
+                    if i[0] == self.name:
+                        no = i[1]
+                j = int(no)
+                unread = []
+                try:
+                    unread = msg[-j:]
+                except Exception:
+                    pass
+
+                for i in unread:
+                    self.speak.Speak(self.name + "told" + i)
+                    print(self.name, ":", i)
+            else:
+                x_arg = '//span[contains(@title,"' + self.name + '")]'
+                group_title = self.wait.until(EC.presence_of_element_located((By.XPATH, x_arg)))
+                group_title.click()
+
+            self.msgORback = ''
+            a = 0
+            while (True):
+                # self.msgORback=input("You:")
+                self.speech_message()
+                self.msgORback = self.response
+                if a == 0:
+                    self.tmpmsg = self.msgORback
+                if self.msgORback == 'back' or self.msgORback == 'Back':
+                    self.command()
+
+                else:
+                    inp = "//div[@contenteditable='true']"
+                    input_box = self.wait.until(EC.presence_of_element_located((By.XPATH, inp)))
+                    input_box.send_keys(self.msgORback + Keys.ENTER)
+                    print("✔")
+                    time.sleep(2)
+
+                    # get all the messages
+                    x_arg = '//span[@dir="ltr"][@class="selectable-text invisible-space copyable-text"]'
+                    text = self.driver.find_elements_by_xpath(x_arg)
+                    msg = []
+                    for i in text:
+                        msg.append(i.text)
+                    n1 = 0
+                    n2 = 0
+                    # if there is any msg after u sent then show that msg
+                    for i in range(len(msg)):
+                        if msg[i] == self.tmpmsg:
+                            n1 = i
+                        elif msg[i] == self.msgORback:
+                            n2 = i
+                    recieve = []
+                    try:
+                        recieve = msg[n1 + 1:n2]
+                    except Exception:
+                        pass
+                    for i in recieve:
+                        self.speak.Speak(self.name + "told" + i)
+                        print(self.name, ":", i)
+                    self.tmpmsg = self.msgORback
+                    a = a + 1
+
+    def Unread(self):
+
+        a = '//div[@class="_3j7s9"]'
+
+        allMsg = self.driver.find_elements_by_xpath(a)
+
+        l = []
+        for i in allMsg:
+            l.append(list(map(str, i.text.split('\n'))))
+
+        whoSent = []
+        for i in l:
+            try:
+                if int(i[len(i) - 1]):
+                    self.speak.Speak(i[0]+"has sent"+i[len(i) - 1]+"messages")
+                    print("{}:({})".format(i[0], i[len(i) - 1]))
+                    whoSent.append([i[0], i[len(i) - 1]])
+            except Exception:
+                pass
+        self.command()
+
+    def group_form(self):
+        x_arg = '//div[@role="button"][@title="Menu"]'
+        text = self.driver.find_element_by_xpath(x_arg)
+        text.click()
+
+        y_arg = '//div[@class="_3lSL5 _2dGjP"][@role="button"][@title="New group"]'
+        text1 = self.driver.find_element_by_xpath(y_arg)
+        text1.click()
+
+        z_arg = '//input[@class="_16RnB copyable-text selectable-text"][@placeholder="Type contact name"]'
+        input_box = self.wait.until(EC.presence_of_element_located((By.XPATH, z_arg)))
+
+        self.newChat = []
+        x = '//span[@dir="auto"][@class="_1wjpf"]'
+        names = self.driver.find_elements_by_xpath(x)
+        for i in names:
+            self.newChat.append(i.text)
+
+        i = 1
+        while i == 1:
+
+            self.speech_name()
+            self.temp = self.response
+
+            if 'back' in self.temp:
+                back = '//span[@data-icon="back-light"]'
+                Back = self.driver.find_element_by_xpath(back)
+                Back.click()
+                i = 0
+            elif 'end' in self.temp or 'and' in self.temp:
+                make_grp = '//span[@data-icon="forward-light"]'
+                mkGrp = self.driver.find_element_by_xpath(make_grp)
+                mkGrp.click()
+                grp_name = '//div[@class="_2S1VP copyable-text selectable-text"][@contenteditable="true"]'
+                input_box = self.wait.until(EC.presence_of_element_located((By.XPATH, grp_name)))
+
+                # self.name=input("Enter group name: ")
+
+                self.speech_group()
+                self.name = self.response
+                input_box.send_keys(self.name)
+                time.sleep(5)
+                tick = '//span[@data-icon="checkmark-light"]'
+                tik = self.driver.find_element_by_xpath(tick)
+                tik.click()
+                i = 0
+            else:
+                if self.temp in self.newChat:
+                    self.ch = self.temp
+                    self.speak.Speak(self.ch+"is added")
+                    print(self.ch,"is added")
+                    input_box.send_keys(self.ch + Keys.ENTER)
+                elif len(get_close_matches(self.temp, self.newChat)) > 0:
+                    self.speak.Speak(get_close_matches(self.temp, self.newChat)[0]+"is added")
+                    print(get_close_matches(self.temp, self.newChat)[0],"is added")
+                    self.ch = get_close_matches(self.temp, self.newChat)[0]
+                    input_box.send_keys(self.ch + Keys.ENTER)
+                else:
+                    self.speak.Speak("Cannot understand")
+                    print("Cannot understand")
+
+        self.command()
+
+    def count(self):
+        self.coun = 0
+
+    def command(self):
+        if self.coun == 0:
+            self.speak.Speak("Welcome to Future")
+            self.speak.Speak("Commands are ")
+            self.speak.Speak("send for sending messages")
+            self.speak.Speak("unread for reading unraed messages")
+            self.speak.Speak("group for making group")
+            self.speak.Speak("back for changing your command")
+            self.speak.Speak("exit for ending the application")
+            self.coun = +1
+        self.speech_command()
+        ch = self.response
+        if 'send' in ch or 'Send' in ch:
+            self.sendingMessages()
+        elif 'unread' in ch or 'Unread' in ch or 'hundred' in ch or 'Hundred' in ch or 'Android' in ch:
+            self.Unread()
+        elif 'group' in ch or 'Group' in ch:
+            self.group_form()
+        elif 'exit' in ch or 'Exit' in ch:
+            exit()
+        else:
+            print("Cant recognize command")
+            self.speak.Speak("Cant recognize command")
+            self.command()
+
+
+s = new()
+s.count()
+s.openingWhatsapp()
